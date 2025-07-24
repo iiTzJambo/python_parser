@@ -1,2 +1,4 @@
 links.txt
 template.docx
+persons/*.*
+src/__pycache__

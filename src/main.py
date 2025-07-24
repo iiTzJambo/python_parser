@@ -1,27 +1,17 @@
-import requests 
-from bs4 import BeautifulSoup
-from fake_useragent import UserAgent 
-from translate import Translator
-from docx import Document
 from getLinksFromTxt import links
 from getDataFromLink import getPersonData
-
+from writePersonInFile import saveInFile
 print(links)
 
 personsList = []
 
 for link in links:
     person = getPersonData(link)
-    personsList.append(person)
 
-ua = UserAgent() 
-headers = {"User-Agent": ua.random} 
+    if person["name"]:
+        personsList.append(person)
 
-translator = Translator(to_lang="ru")
- 
+print(personsList)
 
-
-
-
-
-
+for person in personsList:
+    saveInFile(person, person["name"])
