@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
+from getLinksFromTxt import links
+from urllib.parse import urljoin
 
 ua = UserAgent()
 headers = {"User-Agent": ua.random}
@@ -14,12 +16,13 @@ def getName(wrapper):
         return "empty_name"
 
 
-def getPhoto(wrapper):
+def getPhoto(wrapper, link):
     # получить путь к картинке
+    baseLink = link
     photo = wrapper.find("img", class_="img-responsive").get("src")
-
-    if photo:
-        return photo
+    absoluteLink = urljoin(baseLink, photo)
+    if absoluteLink:
+        return absoluteLink
     else:
         return ""
 
@@ -50,8 +53,10 @@ def getPersonData(link):
     soup = BeautifulSoup(response.text, "lxml")
     # print("SOUP: ", soup)
 
+    for link in links:
+        person["photo"] = getPhoto(soup, link)
+
     person["name"] = getName(soup)
-    person["photo"] = getPhoto(soup)
     person["bio"] = getBio(soup)
 
     return person

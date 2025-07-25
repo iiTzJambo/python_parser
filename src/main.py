@@ -1,7 +1,6 @@
 from getLinksFromTxt import links
 from getDataFromLink import getPersonData
 from writePersonInFile import saveInFile
-print(links)
 
 personsList = []
 
