@@ -1,17 +1,11 @@
 from getLinksFromTxt import links
 from getDataFromLink import getPersonData
 from writePersonInFile import saveInFile
-print(links)
 
 personsList = []
 
 for link in links:
+    print(f"Обрабатывается ссылка:{link}")
     person = getPersonData(link)
-
-    if person["name"]:
-        personsList.append(person)
-
-print(personsList)
-
-for person in personsList:
     saveInFile(person, person["name"])
+    print(person)
