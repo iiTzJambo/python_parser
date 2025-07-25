@@ -1,5 +1,4 @@
 from docx import Document
-# from getDataFromLink import getPersonData
 
 templatePath = "./template.docx"
 personsPath = "persons/"
@@ -8,6 +7,9 @@ doc = Document(templatePath)
 
 
 def saveInFile(person, fileName):
+
+    print(person["photo"], fileName)
+
     doc.paragraphs[1].text = person["name"]
     doc.paragraphs[2].text = person["photo"]
     # doc.paragraphs[4].text = person.org_name
@@ -19,4 +21,5 @@ def saveInFile(person, fileName):
     doc.paragraphs[16].text = person["bio"]
     # doc.paragraphs[18].text = person.source
     # doc.paragraphs[20].text = person.create
+
     doc.save(f"{personsPath}{fileName}.docx")
