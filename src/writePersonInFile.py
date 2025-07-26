@@ -1,25 +1,17 @@
 from docx import Document
+from docx.shared import Pt, RGBColor, Inches
 
-templatePath = "./template.docx"
 personsPath = "persons/"
 
-doc = Document(templatePath)
+doc = Document()
 
 
 def saveInFile(person, fileName):
 
-    # print(person["photo"], fileName)
+    doc.add_heading(person["name"], 1)
 
-    doc.paragraphs[1].text = person["name"]
-    doc.paragraphs[2].text = person["photo"]
-    # doc.paragraphs[4].text = person.org_name
-    # doc.paragraphs[6].text = person.job
-    # doc.paragraphs[8].text = person.job
-    # doc.paragraphs[10].text = person.rank
-    # doc.paragraphs[12].text = person.exp
-    # doc.paragraphs[14].text = person.educ
-    doc.paragraphs[16].text = person["bio"]
-    # doc.paragraphs[18].text = person.source
-    # doc.paragraphs[20].text = person.create
+    doc.add_picture(person["photo"], width=Inches(3), height=Inches(3.25))
+
+    paragraph = doc.add_paragraph(person["bio"])
 
     doc.save(f"{personsPath}{fileName}.docx")
