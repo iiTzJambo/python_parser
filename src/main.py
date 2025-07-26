@@ -4,7 +4,7 @@ from writePersonInFile import saveInFile
 
 personsList = []
 
-for link in links:
+for link in links[:]:
     person = getPersonData(link)
 
     if person["name"]:

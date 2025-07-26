@@ -8,7 +8,7 @@ doc = Document(templatePath)
 
 def saveInFile(person, fileName):
 
-    print(person["photo"], fileName)
+    # print(person["photo"], fileName)
 
     doc.paragraphs[1].text = person["name"]
     doc.paragraphs[2].text = person["photo"]

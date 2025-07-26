@@ -3,12 +3,14 @@ from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from getLinksFromTxt import links
 from urllib.parse import urljoin
+from time import sleep
 
 ua = UserAgent()
 headers = {"User-Agent": ua.random}
 
 
 def getName(wrapper):
+    borderWrapper = wrapper.find("div", class_="border-wrapper")
     name = wrapper.find("h1", class_="title").text
     if name:
         return name
@@ -19,7 +21,8 @@ def getName(wrapper):
 def getPhoto(wrapper, link):
     # получить путь к картинке
     baseLink = link
-    photo = wrapper.find("img", class_="img-responsive").get("src")
+    borderWrapper = wrapper.find("div", class_="border-wrapper")
+    photo = borderWrapper.find("img", class_="img-responsive").get("src")
     absoluteLink = urljoin(baseLink, photo)
     if absoluteLink:
         return absoluteLink
@@ -28,7 +31,8 @@ def getPhoto(wrapper, link):
 
 
 def getBio(wrapper):
-    bio = wrapper.find("div", class_="body").text
+    borderWrapper = wrapper.find("div", class_="border-wrapper")
+    bio = borderWrapper.find("div", class_="body").text
     if bio:
         return bio
     else:
@@ -36,6 +40,7 @@ def getBio(wrapper):
 
 
 def getPersonData(link):
+    sleep(10)
     person = {
         "name": "",
         "photo": "",
@@ -49,6 +54,8 @@ def getPersonData(link):
             f"Ошибка при запросе на: {link}, status code = {response.status_code}"
         )
         return person
+    else:
+        print(f"200 \n {link}")
 
     soup = BeautifulSoup(response.text, "lxml")
     # print("SOUP: ", soup)

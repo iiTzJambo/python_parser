@@ -6,4 +6,4 @@ with open(linkPath, 'r', encoding='utf-8') as file:
 
     for line in lines:
         links.append(line)
-    print(links)
+    # print(links)
