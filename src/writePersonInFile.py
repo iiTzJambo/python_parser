@@ -12,6 +12,6 @@ def saveInFile(person, fileName):
 
     doc.add_picture(person["photo"], width=Inches(3), height=Inches(3.25))
 
-    paragraph = doc.add_paragraph(person["bio"])
+    paragraph = doc.add_paragraph(person["personalInfo"])
 
     doc.save(f"{personsPath}{fileName}.docx")

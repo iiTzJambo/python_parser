@@ -16,8 +16,8 @@ personsList = []
 for link in links[:]:
     person = getPersonData(link)
 
-    if person["name"]:
-        personsList.append(person)
+if person["name"]:
+    personsList.append(person)
 
 print(personsList)
 

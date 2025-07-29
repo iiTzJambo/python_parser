@@ -2,77 +2,91 @@ import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from urllib.parse import urljoin
-from time import sleep
+# from time import sleep
 import tempfile
+import traceback
 
 ua = UserAgent()
 headers = {"User-Agent": ua.random}
 
 
 def getName(wrapper):
-
-    borderWrapper = wrapper.find("div", class_="border-wrapper")
-    name = wrapper.find("h1", class_="title").text
-    if name:
-        return name
-    else:
+    try:
+        name = wrapper.find("h1", class_="title").text.strip()
+        return name if name else "empty_name"
+    except AttributeError:
+        return "empty_name"
+    except Exception as e:
+        print(f"Ошибка при получении имени: {str(e)}")
         return "empty_name"
 
 
 def getPhoto(wrapper, link):
+    try:
+        borderWrapper = wrapper.find("div", class_="border-wrapper")
+        img_tag = borderWrapper.find("img", class_="img-responsive")
+        photo_url = img_tag.get("src")
+        absolute_link = urljoin(link, photo_url)
 
-    borderWrapper = wrapper.find("div", class_="border-wrapper")
-    img_tag = borderWrapper.find("img", class_="img-responsive")
-    photo_url = img_tag.get("src")
-    absolute_link = urljoin(link, photo_url)
+        response = requests.get(absolute_link, headers=headers, timeout=10)
+        response.raise_for_status()
 
-    response = requests.get(absolute_link, headers=headers)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_file:
+            tmp_file.write(response.content)
+            tmp_file_path = tmp_file.name
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_file:
-        tmp_file.write(response.content)
-        tmp_file_path = tmp_file.name
+        return tmp_file_path
+    except requests.exceptions.RequestException as e:
+        print(f"Ошибка при загрузке фото: {str(e)}")
+        return ""
+    except Exception as e:
+        print(f"Неожиданная ошибка при получении фото: {str(e)}")
+        return ""
 
-    return tmp_file_path
 
+def getPersonalInfo(wrapper):
+    try:
+        borderWrapper = wrapper.find("div", class_="border-wrapper")
+        body = borderWrapper.find("div", class_="body").text
+        replaceWords = ["\n", "\r", "\n1", "\n2",
+                        "\n3", "\n4", "\n5", "\n6", "\n7", "\n8"]
 
-def getBio(wrapper):
-    borderWrapper = wrapper.find("div", class_="border-wrapper")
-    bio = borderWrapper.find("div", class_="body").text
-
-    replaceWords = ["\n", "\r", "\n1", "\n2",
-                    "\n3", "\n4", "\n5", "\n6", "\n7", "\n8"]
-
-    for word in replaceWords:
-        bio = bio.replace(word, "")
-    if bio:
-        return bio
-    else:
+        for word in replaceWords:
+            body = body.replace(word, "")
+        return body if body else "empty_bio"
+    except AttributeError:
+        return "empty_bio"
+    except Exception as e:
+        print(f"Ошибка при получении информации: {str(e)}")
         return "empty_bio"
 
 
 def getPersonData(link):
-    sleep(10)
     person = {
-        "name": "",
+        "name": "empty_name",
         "photo": "",
-        "bio": ""
+        "personalInfo": "empty_bio"
     }
-    response = requests.get(link, headers=headers)
 
-    if response.status_code != 200:
+    try:
+        response = requests.get(link, headers=headers, timeout=10)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, "lxml")
+
+        person["photo"] = getPhoto(soup, link)
+        person["name"] = getName(soup)
+        person["personalInfo"] = getPersonalInfo(soup)
+
+    except requests.exceptions.Timeout:
+        print(f"Превышено время ожидания сервера для ссылки {link}")
+    except requests.exceptions.ConnectionError:
+        print(f"Не удалось подключиться к серверу для ссылки {link}")
+    except requests.exceptions.HTTPError as err:
         print(
-            f"Ошибка при запросе на: {link}, status code = {response.status_code}"
-        )
-        return person
-    else:
-        print(f"200 \n {link}")
-
-    soup = BeautifulSoup(response.text, "lxml")
-    # print("SOUP: ", soup)
-
-    person["photo"] = getPhoto(soup, link)
-
-    person["name"] = getName(soup)
-    person["bio"] = getBio(soup)
+            f"Ошибка при запросе для ссылки {link}: {err.response.status_code}")
+    except Exception as e:
+        print(f"Неожиданная ошибка при обработке ссылки {link}: {str(e)}")
+        traceback.print_exc()
 
     return person
