@@ -8,17 +8,20 @@ import traceback
 
 ua = UserAgent()
 headers = {"User-Agent": ua.random}
+punct = ['!', '@', '#', '$', '%', '^', '&', '?', '"', '<', '>']
 
 
 def getName(wrapper):
     try:
-        name = wrapper.find("h1", class_="title").text.strip()
-        return name if name else "empty_name"
+        name = wrapper.find("h1", class_="title").text
+        for p in punct:
+            name = name.replace(p, '')
+        return name
     except AttributeError:
-        return "empty_name"
+        return name
     except Exception as e:
         print(f"Ошибка при получении имени: {str(e)}")
-        return "empty_name"
+        return name
 
 
 def getPhoto(wrapper, link):
@@ -63,13 +66,13 @@ def getPersonalInfo(wrapper):
 
 def getPersonData(link):
     person = {
-        "name": "empty_name",
-        "photo": "",
-        "personalInfo": "empty_bio"
+        "name": "Person",
+        "photo": "IMAGE.png",
+        "personalInfo": ""
     }
 
     try:
-        response = requests.get(link, headers=headers, timeout=1000)
+        response = requests.get(link, headers=headers, timeout=100000)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "lxml")
@@ -77,6 +80,8 @@ def getPersonData(link):
         person["photo"] = getPhoto(soup, link)
         person["name"] = getName(soup)
         person["personalInfo"] = getPersonalInfo(soup)
+
+        print('Status code:', response.status_code, 'person', person['name'])
 
     except requests.exceptions.Timeout:
         print(f"Превышено время ожидания сервера для ссылки {link}")
