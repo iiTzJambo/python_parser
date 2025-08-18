@@ -1,17 +1,24 @@
 from docx import Document
-from docx.shared import Pt, RGBColor, Inches
+from docx.shared import Inches
 
 personsPath = "persons/"
 
-doc = Document()
-
 
 def saveInFile(person, fileName):
+    doc = Document()
+    photo = ''
+
+    print(person, '1123')
 
     doc.add_heading(person["name"], 1)
 
-    doc.add_picture(person["photo"], width=Inches(3), height=Inches(3.25))
+    if person["photo"] == '':
+        photo = 'C:\Program Files\GitHub\python_parser\IMAGE.png'
+    else:
+        photo = person["photo"]
 
-    paragraph = doc.add_paragraph(person["personalInfo"])
+    doc.add_picture(photo, width=Inches(3), height=Inches(3.25))
 
-    doc.save(f"{personsPath}{fileName}.docx")
+    doc.add_paragraph(person["personalInfo"])
+
+    doc.save(f"{personsPath}/{fileName}.docx")

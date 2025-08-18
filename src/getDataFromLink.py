@@ -69,7 +69,7 @@ def getPersonData(link):
     }
 
     try:
-        response = requests.get(link, headers=headers, timeout=10)
+        response = requests.get(link, headers=headers, timeout=1000)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "lxml")
