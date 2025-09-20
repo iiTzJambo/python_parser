@@ -1,8 +1,10 @@
+import aiohttp
+import asyncio
+import aiofiles
 import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 from urllib.parse import urljoin
-# from time import sleep
 import tempfile
 import traceback
 
@@ -11,7 +13,7 @@ headers = {"User-Agent": ua.random}
 punct = ['!', '@', '#', '$', '%', '^', '&', '?', '"', '<', '>']
 
 
-def getName(wrapper):
+async def getName(wrapper):
     try:
         name = wrapper.find("h1", class_="title").text
         for p in punct:
@@ -24,7 +26,7 @@ def getName(wrapper):
         return name
 
 
-def getPhoto(wrapper, link):
+async def getPhoto(wrapper, link):
     try:
         borderWrapper = wrapper.find("div", class_="border-wrapper")
         img_tag = borderWrapper.find("img", class_="img-responsive")
@@ -47,7 +49,7 @@ def getPhoto(wrapper, link):
         return ""
 
 
-def getPersonalInfo(wrapper):
+async def getPersonalInfo(wrapper):
     try:
         borderWrapper = wrapper.find("div", class_="border-wrapper")
         body = borderWrapper.find("div", class_="body").text
@@ -64,7 +66,14 @@ def getPersonalInfo(wrapper):
         return "empty_bio"
 
 
-def getPersonData(link):
+async def response(link):
+    response = requests.get(link, headers=headers, timeout=10)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "lxml")
+    return soup
+
+
+async def getPersonData(link):
     person = {
         "name": "Person",
         "photo": "IMAGE.png",
@@ -72,16 +81,11 @@ def getPersonData(link):
     }
 
     try:
-        response = requests.get(link, headers=headers, timeout=100000)
-        response.raise_for_status()
+        soup = await response(link)
 
-        soup = BeautifulSoup(response.text, "lxml")
-
-        person["photo"] = getPhoto(soup, link)
-        person["name"] = getName(soup)
-        person["personalInfo"] = getPersonalInfo(soup)
-
-        print('Status code:', response.status_code, 'person', person['name'])
+        person["photo"] = await getPhoto(soup, link)
+        person["name"] = await getName(soup)
+        person["personalInfo"] = await getPersonalInfo(soup)
 
     except requests.exceptions.Timeout:
         print(f"Превышено время ожидания сервера для ссылки {link}")

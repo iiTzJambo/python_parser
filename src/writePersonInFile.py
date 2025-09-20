@@ -1,6 +1,5 @@
 from docx import Document
 from docx.shared import Inches
-import time
 
 
 personsPath = "persons/"
@@ -12,11 +11,13 @@ def saveInFile(person, fileName):
 
     doc = Document()
 
-    print(f'Person name: {person['name']} ')
+    print(
+        f'Person name: {person['name']}', '\n'
+    )
 
     doc.add_heading(person["name"], 1)
 
-    doc.add_picture(person['photo'], width=Inches(3), height=Inches(3.25))
+    doc.add_picture(person['photo'], width=Inches(2.7), height=Inches(3))
 
     doc.add_paragraph(person["personalInfo"])
 
